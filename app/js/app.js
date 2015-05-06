@@ -84,17 +84,20 @@ var Watchnext = (function(){
 
 		function SeriesCollection(){
 			this.series = [];
-
-			//fetch data
 			adapter.get(null, null);
 		}
 		var seriesCollection = new SeriesCollection();
 
 		SeriesCollection.prototype.add = function(show){
-			this.series.push(show);
+			var index = _.sortedIndex(this.series, show, 'name');	
+			//this.series.push(show);
+			this.series.splice(index, 0, show);
 		};
 
 		SeriesCollection.prototype.save = function(show){
+			_.each(show.seasons, function(element, index, list){
+				element.episodes = _.sortyBy(element.episodes, 'number');
+			});
 			this.add(show);
 			adapter.save(show);
 		};
