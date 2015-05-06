@@ -1,0 +1,120 @@
+.main{
+	height: 400px;
+	margin-top: 6px;
+	h4{
+		padding-left: 30px;
+		font-size: 1.2em;
+	}
+}
+
+.search{
+	position: relative;
+	height: 32px;
+	margin-top: 6px;
+	margin-bottom: 12px;
+}
+
+.form-search{
+	width: 100%;
+	padding: 0 30px;
+}
+
+#back-to-main, #query-series, #search{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+#back-to-main, #search{
+	position: absolute;
+	top: 9px;
+	width: 16px;
+}
+
+#back-to-main{
+	cursor: pointer;
+	left: 0;
+}
+
+#search{
+	right: 0;
+}
+
+#query-series{
+	
+}
+
+.list-series{
+	list-style: none;
+	padding: 0;
+
+	li{
+		min-height: 82px;
+		padding: 0;
+
+		.series-image, .series-name{
+			display: block;
+		}
+
+		.series-image{
+			float: left;
+			width: 52px;
+			height: 82px;
+			margin-right: 18px;
+			img{
+				width: inherit;
+				height: inherit;
+			}
+		}
+
+		.series-name{
+			width: 292px;
+
+			h5{
+				margin-bottom: 0;
+			}
+		}
+	}
+}
+
+.list-seasons{
+	list-style: none;
+	padding: 0;
+
+	li.single-season{
+		max-height: 72px;
+		position: relative;
+		overflow: hidden;
+		
+		.season-number{
+			margin-bottom: 6px;
+			.mui-checkbox{
+				position: absolute;
+				right: 14px;
+				top: -8px;
+			}
+		}
+
+		ul.list-episodes{
+			list-style-type: disc;
+			margin-top: 8px;
+			margin-bottom: 18px;
+
+			li{
+				position: relative;
+				line-height: 34px;
+
+				.mui-checkbox{
+					position: absolute;
+					right: 14px;
+					top: -8px;
+				}
+			}
+		}
+		transition: max-height 0.25s ease-in;
+	}
+
+	li.single-season.expand{
+		max-height: 560px;
+		transition: max-height 0.5s ease-out;
+	}
+}

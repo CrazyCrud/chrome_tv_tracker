@@ -1,0 +1,57 @@
+@mixin button-variant($mui-color, $mui-background) {
+  color: $mui-color;
+  background-color: $mui-background;
+
+  &:hover,
+  &:focus,
+  &:active,
+  .mui-open > &.mui-dropdown-toggle {
+    color: $mui-color;
+    background-color: lighten($mui-background, 5%);
+  }
+
+  &[disabled],
+  fieldset[disabled] & {
+    &,
+    &:hover,
+    &:focus,
+    &:active {
+      color: $mui-color;
+      background-color: $mui-background;
+    }
+  }
+}
+
+@mixin button-flat-variant($mui-color, $mui-hover-bg) {
+  &.mui-btn-flat {
+    color: $mui-color;
+    background-color: transparent;
+
+    &:hover,
+    &:focus,
+    &:active,
+    .mui-open > &.mui-dropdown-toggle {
+      color: $mui-color;
+      background-color: $mui-hover-bg;
+    }
+
+    &[disabled],
+    fieldset[disabled] & {
+      &,
+      &:hover,
+      &:focus,
+      &:active {
+        color: $mui-color;
+        background-color: transparent;
+      }
+    }
+  }
+}
+
+// Button sizes
+@mixin button-size($mui-padding-vertical, $mui-padding-horizontal, $mui-font-size, $mui-line-height, $mui-border-radius) {
+  padding: ($mui-padding-vertical + 1px) ($mui-padding-horizontal + 1px);
+  font-size: $mui-font-size;
+  line-height: $mui-line-height;
+  border-radius: $mui-border-radius;
+}

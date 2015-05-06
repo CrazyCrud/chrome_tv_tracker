@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Watch' Next</title>
+	<link rel="stylesheet" type="text/css" href="css/app.css">
+</head>
+<body>
+	<div class="index mui-container">
+		<div class="mui-row">
+			<div class="mui-col-xs-12">
+				<div class="search">
+					<section>
+						<form class="mui-form-inline form-search">
+							<a id="back-to-main" class="mui-hide">
+								<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+							</a>
+							<input id="query-series" class="mui-form-control" type="text" 
+								placeholder="Find new series...">
+							<a id="search" class="">
+								<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+							</a>
+						</form>
+					</section>
+				</div>
+			</div>
+			<div class="mui-col-xs-12">
+				<div class="main">
+					<div class="mui-divider"></div>
+					<h4 class="mui-text-display1 mui-text-black"></h4>
+					<section class="main-section">
+
+					</section>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/html" id="template-episode">
+		<div class="episode">
+			<span><%- number %>.<%- name %></span>
+			<div class="mui-checkbox">
+				<label>
+				<input type="checkbox" value="" <% if(watched){ %> checked <% } %>>
+					Watched
+				</label>
+			</div>
+		</div>
+	</script>
+	<script type="text/html" id="template-details">
+		<ul class="list-seasons" id="<%= series.id %>">
+			<% _.each(series.seasons, function(season, indexSeason, listSeason){ %>
+				<li id="<%= season.id %>" class="single-season">
+					<div class="season-number">
+						<span><%- season.number %>. Season</span>
+						<!--
+						<div class="mui-checkbox">
+							<label>
+							<input class="watched-season" type="checkbox" value="" data-season="<%= indexSeason %>">
+								Watched
+							</label>
+						</div>
+						-->
+					</div>
+					<div>
+						<button class="expand mui-btn mui-btn-primary">Show episodes</button>
+					</div>
+					<div>
+						<ul class="list-episodes">
+							<% _.each(season.episodes, function(episode, indexEpisode, list){ %>
+								<li id="<%= episode.id %>" class="episode">
+									<%= indexEpisode + 1 %>.<%= episode.name %>
+									<div class="mui-checkbox">
+										<label>
+										<input class="watched-episode" type="checkbox" value="" data-episode="<%= indexEpisode %>" data-season="<%= indexSeason %>"
+											<% if(episode.watched){ %>
+												checked="true"
+											<% } %>
+										>
+											
+										</label>
+									</div>
+								</li>
+							<% }); %>
+						</ul>
+					</div>
+				</li>
+			<% }); %>
+		</ul>
+	</script>
+	<script type="text/html" id="template-series-list">
+		<ul class="list-series">
+			<% _.each(seriesList, function(element, index, list){ %>
+				<li id="<%= element.id %>">
+					<div class="series-image">
+					<% if(!_.isNull(element.image) && element.image.length > 0){ %>
+						<img src="http://image.tmdb.org/t/p/w92<%= element.image %>">
+					<% } %>
+					</div>
+					<div class="series-name">
+						<h5><%- element.name %></h5>
+						<button class="details mui-btn mui-btn-primary">Show details</button>
+						<button class="delete mui-btn mui-btn-primary">Delete</button>
+					</div>
+					<div class="clear"></div>
+				</li>
+			<% }); %>
+		</ul>
+	</script>
+	<script type="text/html" id="template-search-results">
+		<ul class="list-series">
+			<% _.each(results, function(element, index, list){ %>
+				<li id="<%= element.id %>">
+					<div class="series-image">
+					<% if(!_.isNull(element.image) && element.image.length > 0){ %>
+						<img src="http://image.tmdb.org/t/p/w92<%= element.image %>">
+					<% } %>
+					</div>
+					<div class="series-name">
+						<h5><%- element.name %></h5>
+						<button class="add mui-btn mui-btn-primary">Add to collection</button>
+					</div>
+					<div class="clear"></div>
+				</li>
+			<% }); %>
+		</ul>
+	</script>
+	<script type="text/javascript" src="js/production.js"></script>
+</body>
+</html>
