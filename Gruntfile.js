@@ -29,7 +29,7 @@ module.exports = function(grunt) {
               },
             },
             app: {
-              src: ['app/js/vendor/underscore.js', 'app/js/vendor/jquery.js', 'app/js/vendor/backbone.js', 'app/js/vendor/backbone.localStorage.js','app/js/vendor/mui.js', 'app/js/app.js'],
+              src: ['app/js/vendor/underscore.js', 'app/js/vendor/jquery.js', 'app/js/vendor/mui.js', 'app/js/app.js'],
               dest: 'app/js/production.js',
             }
         },

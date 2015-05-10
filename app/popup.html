@@ -46,6 +46,24 @@
 		</div>
 	</script>
 	<script type="text/html" id="template-details">
+		<div class="mui-panel info">
+			<div class="series-image">
+				<% if(!_.isNull(series.image) && series.image.length > 0){ %>
+					<img src="http://image.tmdb.org/t/p/w92<%= series.image %>">
+				<% } %>
+			</div>
+			<div class="series-name">
+				<h5><%- series.name %></h5>
+				<%- series.date %>
+				</br>
+				<% if(series.inProduction){ %>
+					This series is still in production
+				<% }else{ %>
+					This series is over
+				<% } %>
+			</div>
+			<div class="clear"></div>
+		</div>
 		<ul class="list-seasons" id="<%= series.id %>">
 			<% _.each(series.seasons, function(season, indexSeason, listSeason){ %>
 				<li id="<%= season.id %>" class="single-season">

@@ -1,5 +1,6 @@
 .main{
 	height: 400px;
+	overflow-y: scroll; 
 	margin-top: 6px;
 	h4{
 		padding-left: 30px;
@@ -43,6 +44,29 @@
 	
 }
 
+.series-image, .series-name{
+	display: block;
+}
+
+.series-image{
+	float: left;
+	width: 52px;
+	height: 82px;
+	margin-right: 18px;
+	img{
+		width: inherit;
+		height: inherit;
+	}
+}
+
+.series-name{
+	width: 292px;
+	line-height: 26px;
+	h5{
+		margin-bottom: 0;
+	}
+}
+
 .list-series{
 	list-style: none;
 	padding: 0;
@@ -51,34 +75,19 @@
 		min-height: 82px;
 		padding: 0;
 
-		.series-image, .series-name{
-			display: block;
-		}
-
-		.series-image{
-			float: left;
-			width: 52px;
-			height: 82px;
-			margin-right: 18px;
-			img{
-				width: inherit;
-				height: inherit;
-			}
-		}
-
-		.series-name{
-			width: 292px;
-
-			h5{
-				margin-bottom: 0;
-			}
-		}
+		
 	}
+}
+
+.info{
+	padding-left: 0;
+	padding-right: 0; 
 }
 
 .list-seasons{
 	list-style: none;
 	padding: 0;
+	margin-top: 22px;
 
 	li.single-season{
 		max-height: 72px;
@@ -98,14 +107,14 @@
 			list-style-type: disc;
 			margin-top: 8px;
 			margin-bottom: 18px;
-
+			width: 300px;
 			li{
 				position: relative;
 				line-height: 34px;
 
 				.mui-checkbox{
 					position: absolute;
-					right: 14px;
+					right: -46px;
 					top: -8px;
 				}
 			}
@@ -114,7 +123,16 @@
 	}
 
 	li.single-season.expand{
-		max-height: 560px;
+		max-height: 1500px;
 		transition: max-height 0.5s ease-out;
 	}
+}
+
+.loading{
+	position: fixed;
+	width: 32px;
+	height: 32px;
+	top: 440px;
+	left: 364px;
+	background: url('../assets/loading.gif');
 }

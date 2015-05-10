@@ -1,6 +1,8 @@
 var Watchnext = (function(){
 	var _key = 'eb2f22e12032ae1141522496ebbcce55',
 	_currentRequest = null,
+	_state = -1,
+	_isSearching = false,
 	_elements = {
 		body: $("body"),
 		mainSection: $("section.main-section"),
@@ -19,6 +21,7 @@ var Watchnext = (function(){
 			data[key] = show;
 			chrome.storage.local.set(data, function() {
 				console.log("Saved!");
+				searchView.deactivateOverlay();
 			});
 		};
 		
@@ -96,15 +99,15 @@ var Watchnext = (function(){
 
 		SeriesCollection.prototype.save = function(show){
 			_.each(show.seasons, function(element, index, list){
-				element.episodes = _.sortyBy(element.episodes, 'number');
+				element.episodes = _.sortBy(element.episodes, 'number');
 			});
 			this.add(show);
 			adapter.save(show);
 		};
 
-		SeriesCollection.prototype.remove = function(show){
+		SeriesCollection.prototype.remove = function(seriesId){
 			var index = _.findIndex(this.series, function(element){
-				return element.id == show.id;
+				return element.id == seriesId;
 			});
 
 			if(index > -1){
@@ -160,7 +163,13 @@ var Watchnext = (function(){
 					_currentRequest.abort();
 				}
 				searchView.get("element").val("");
-				seriesListView.render();
+				
+				if(_state > -1 && _isSearching === true){
+					// render detail view
+				}else{
+					seriesListView.render();
+				}
+				
 			});
 		};
 		var mainView = new MainView();
@@ -213,6 +222,9 @@ var Watchnext = (function(){
 		SeriesListView.prototype.render = function(){
 			mainView.toggleNavigation(false);
 			mainView.render(this.template({seriesList: this.collection.get("series")}));
+
+			_state = -1;
+			_isSearching = false;
 		};
 
 		SeriesListView.prototype.delete = function(item){
@@ -221,6 +233,7 @@ var Watchnext = (function(){
 				return seriesId == element.id;
 			});
 			item.remove();
+			this.collection.remove(seriesId);
 			adapter.remove(seriesId);
 		};
 
@@ -244,6 +257,9 @@ var Watchnext = (function(){
 			mainView.render(this.template({series: this.model}));
 
 			this.applyEvents();
+
+			_state = this.model.id;
+			_isSearching = false;
 		};
 
 		DetailView.prototype.applyEvents = function(){
@@ -305,6 +321,7 @@ var Watchnext = (function(){
 			});
 			mainView.getElement().on('click', '.add', function(event) {
 				event.preventDefault();
+				that.activateOverlay();
 				$(this).attr('disabled', 'true');
 				$(this).html(that.messages.adddedSeries);
 				var seriesId = $(this).parents('li').attr('id');
@@ -330,6 +347,24 @@ var Watchnext = (function(){
 			mainView.render(this.template({results: this.model.get("results")}));
 		};
 
+		SearchView.prototype.activateOverlay = function(){
+		    var modalEl = document.createElement('div');
+		    modalEl.style.width = '43px';
+		    modalEl.style.height = '11px';
+		    modalEl.style.margin = '100px auto';
+
+		    modalEl.innerHTML = "<img src='assets/loading.gif'/>";
+
+		    mui.overlay('on', {
+		    	'keyboard': false,
+		    	'static': true
+		    }, modalEl);
+		};
+
+		SearchView.prototype.deactivateOverlay = function(){
+			mui.overlay('off');
+		};
+
 		SearchView.prototype.search = function(){
 			var searchItem = $.trim(this.element.val()),
 				query = "http://api.themoviedb.org/3/search/tv?api_key=" + _key + "&query=" + searchItem + "&search_type=ngram";
@@ -338,6 +373,8 @@ var Watchnext = (function(){
 			}
 
 			this.model.empty();
+
+			_isSearching = true;
 
 			if(searchItem.length > 0){
 				var that = this;
@@ -348,7 +385,7 @@ var Watchnext = (function(){
 								id: element.id,
 								name: element.name,
 								image: element.poster_path,
-								date: new Date(element.first_air_date)
+								date: element.first_air_date
 							});
 						});
 					}
@@ -418,7 +455,7 @@ var Watchnext = (function(){
 				var episode = new EpisodeModel({
 					id: response.id,
 					name: response.name,
-					date: new Date(response.air_date),
+					date: response.air_date,
 					seriesId: series.id,
 					seasonId: series.seasons[seasonNumber - 1].id,
 					number: response.episode_number
