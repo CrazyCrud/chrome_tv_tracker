@@ -116,7 +116,56 @@
 					position: absolute;
 					right: -46px;
 					top: -8px;
+
+					input[type="checkbox"]{
+						width: 15px;
+						height: 15px;
+						opacity: 0;
+						-webkit-appearance: none;
+						z-index: 100;
+					}
+
+					input[type="checkbox"]:checked + label{
+						opacity: 0.8;
+						color: #222;
+					}
+
+					label::before{
+						content: '';
+						position: absolute;
+						top: 2px;
+						right: 26px;
+						width: 15px;
+						height: 15px;
+						border: 1px solid #222;
+						-webkit-transition: opacity 0.3s;
+					}
+
+					label{
+						position: relative;
+					}
+
+					svg{
+						position: absolute;
+						top: 6px;
+						right: 28px;
+						width: 11px;
+						height: 11px;
+						pointer-events: none;
+					}
+
+					svg path{
+						stroke: #222;
+						stroke-width: 20px;
+						stroke-linecap: round;
+						stroke-linejoin: round;
+						fill: none;
+					}
 				}
+			}
+
+			.mui-divider{
+				width: 300px;
 			}
 		}
 		transition: max-height 0.25s ease-in;
@@ -126,13 +175,4 @@
 		max-height: 1500px;
 		transition: max-height 0.5s ease-out;
 	}
-}
-
-.loading{
-	position: fixed;
-	width: 32px;
-	height: 32px;
-	top: 440px;
-	left: 364px;
-	background: url('../assets/loading.gif');
 }

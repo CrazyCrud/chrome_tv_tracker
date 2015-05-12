@@ -11,6 +11,11 @@
         "default_title": "Watch' Next",
         "default_popup": "popup.html"
     },
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ]
+    },
     "permissions": [
         "alarms",
         "background",

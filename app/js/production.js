@@ -2737,7 +2737,7 @@ module.exports = {
 			var data = {};
 			data[key] = show;
 			chrome.storage.local.set(data, function() {
-				console.log("Saved!");
+				console.log("Saved!", show);
 				searchView.deactivateOverlay();
 			});
 		};
@@ -2882,7 +2882,14 @@ module.exports = {
 				searchView.get("element").val("");
 				
 				if(_state > -1 && _isSearching === true){
-					// render detail view
+					var series = _.find(seriesCollection.get("series"), function(element){
+						return _state == element.id;
+					});
+
+					var detailView = new DetailView({
+						model: series
+					});
+					detailView.render();
 				}else{
 					seriesListView.render();
 				}
@@ -2967,6 +2974,11 @@ module.exports = {
 			this.controller = options.controller || null;
 			this.model = options.model || null;
 			this.collection = options.collection || null;
+
+			this.pathDef = 'M16.667,62.167c3.109,5.55,7.217,10.591,10.926,15.75 c2.614,3.636,5.149,7.519,8.161,10.853c-0.046-0.051,1.959,2.414,2.692,2.343c0.895-0.088,6.958-8.511,6.014-7.3 c5.997-7.695,11.68-15.463,16.931-23.696c6.393-10.025,12.235-20.373,18.104-30.707C82.004,24.988,84.802,20.601,87,16';
+			this.animDef = {
+				speed : 0.2, easing : 'ease-in-out'
+			};
 		};
 
 		DetailView.prototype.render = function(){
@@ -2974,6 +2986,7 @@ module.exports = {
 			mainView.render(this.template({series: this.model}));
 
 			this.applyEvents();
+			this.applyCheckboxStyle();
 
 			_state = this.model.id;
 			_isSearching = false;
@@ -2991,6 +3004,37 @@ module.exports = {
 			    var episodeIndex = $(this).attr('data-episode');
 			    var seasonIndex = $(this).attr('data-season');
 			    seriesCollection.updateWatchedStatus(that.model.id, parseInt(seasonIndex, 10), parseInt(episodeIndex, 10), this.checked);
+
+			    var svg = $(this).next('svg'),
+			    	paths = [];
+			    paths.push(document.createElementNS('http://www.w3.org/2000/svg', 'path' ));
+			    if(this.checked){
+			    	for(var i = 0, len = paths.length; i < len; ++i) {
+						var path = paths[i];
+						svg.append(path);
+
+						path.setAttributeNS( null, 'd', that.pathDef);
+
+						var length = path.getTotalLength();
+						// Clear any previous transition
+						//path.style.transition = path.style.WebkitTransition = path.style.MozTransition = 'none';
+						// Set up the starting positions
+						path.style.strokeDasharray = length + ' ' + length;
+						if( i === 0 ) {
+							path.style.strokeDashoffset = Math.floor( length ) - 1;
+						}
+						else path.style.strokeDashoffset = length;
+						// Trigger a layout so styles are calculated & the browser
+						// picks up the starting position before animating
+						path.getBoundingClientRect();
+						// Define our transition
+						path.style.transition = path.style.WebkitTransition = path.style.MozTransition  = 'stroke-dashoffset ' + that.animDef.speed + 's ' + that.animDef.easing + ' ' + i * that.animDef.speed + 's';
+						// Go!
+						path.style.strokeDashoffset = '0';
+					}
+			    }else{
+			    	svg.children('path').remove();
+			    }
 			});
 
 			/*
@@ -2999,6 +3043,28 @@ module.exports = {
 			    seriesCollection.updateWatchedStatus(that.model.id, parseInt(seasonIndex, 10), null, this.checked);
 			});
 			*/
+		};
+
+		DetailView.prototype.applyCheckboxStyle = function(){
+			var that = this;
+			
+			$(".watched-episode").each(function(index) {
+				$(this).after(that.createSVG());
+			});
+		};
+
+		DetailView.prototype.createSVG = function(){
+			var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			var def = false;
+			if(def) {
+				svg.setAttributeNS( null, 'viewBox', def.viewBox );
+				svg.setAttributeNS( null, 'preserveAspectRatio', def.preserveAspectRatio );
+			}
+			else {
+				svg.setAttributeNS( null, 'viewBox', '0 0 100 100' );
+			}
+			svg.setAttribute( 'xmlns', 'http://www.w3.org/2000/svg' );
+			return svg;
 		};
 
 
@@ -3117,7 +3183,7 @@ module.exports = {
 					that.render();
 				});
 			}else{
-				seriesListView.render();
+				// seriesListView.render();
 			}
 
 		};
