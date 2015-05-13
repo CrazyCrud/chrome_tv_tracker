@@ -2887,7 +2887,6 @@ module.exports = {
 			if(true){
 				mainView.activateOverlay();
 				that.showsToUpdate = _.where(that.series, {inProduction: true}).length;
-				console.log("Shows to update: ", that.showsToUpdate);
 				_.each(this.series, function(element, index, list){
 					if(element.inProduction){
 						that.updateShowInProduction(element);
@@ -2910,8 +2909,6 @@ module.exports = {
 
 				var numOfLatestEpisodes = show.seasons[show.seasons.length - 1].episodes.length;
 				var latestSeason = show.seasons[show.seasons.length - 1].number;
-
-				console.log(numOfLatestEpisodes, latestSeason);
 
 				// fetch new episodes
 				if(seasons[latestSeason - 1].episode_count > numOfLatestEpisodes){
@@ -2980,6 +2977,7 @@ module.exports = {
 						});
 						that.showsUpdated.push(show.id);
 						that.updateFinished(that.episodesUpdated, true);
+						// updated seasons
 					});
 				}else{
 					that.updateFinished(that.episodesUpdated, true);
@@ -2992,6 +2990,7 @@ module.exports = {
 			var that = this;
 			this.episodesUpdated = areEpisodesUpdated;
 			this.seasonsUpdated = areSeasonsUpdated;
+
 			if(this.episodesUpdated && this.seasonsUpdated && (this.numOfShowsUpdated >= this.showsToUpdate)){
 				this.showsUpdated = _.uniq(this.showsUpdated);
 				_.each(this.showsUpdated, function(element, index, list){
@@ -3000,7 +2999,12 @@ module.exports = {
 					});
 					adapter.save(show);
 				});
+				if(this.showsUpdated.length < 1){
+					mainView.deactivateOverlay();
+				}
 				seriesListView.render();
+			}else{
+				mainView.deactivateOverlay();
 			}
 		};
 
@@ -3092,7 +3096,9 @@ module.exports = {
 		};
 
 		MainView.prototype.deactivateOverlay = function(){
-			mui.overlay('off');
+			if($("body").hasClass('mui-overlay-on')){
+				mui.overlay('off');
+			}
 		};
 
 

@@ -84,6 +84,7 @@
 		</div>
 		<ul class="list-seasons" id="<%= series.id %>">
 			<% _.each(series.seasons, function(season, indexSeason, listSeason){ %>
+				<% if(season.episodes.length < 1){ return; } %>
 				<li id="<%= season.id %>" class="single-season">
 					<div class="season-number">
 						<span><%- season.number %>. Season</span>
