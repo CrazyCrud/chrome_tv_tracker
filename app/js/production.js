@@ -2726,20 +2726,30 @@ module.exports = {
 		seriesList: $(".list-series")
 	},
 	init = function(){
+		
+
+
 		/* Localstorage adapter */
 		var LocalStorageAdapter = function(show){
 			
 		};
 		var adapter = new LocalStorageAdapter();
 
-		LocalStorageAdapter.prototype.save = function(show){
-			var key = show.id;
+		LocalStorageAdapter.prototype.save = function(obj){
+			var key = obj.id;
 			var data = {};
-			data[key] = show;
-			chrome.storage.local.set(data, function() {
-				console.log("Saved!", show);
-				searchView.deactivateOverlay();
-			});
+			data[key] = obj;
+			if(obj.id > 0){
+				chrome.storage.local.set(data, function() {
+					console.log("Saved!", obj);
+					mainView.deactivateOverlay();
+				});
+			}else{
+				chrome.storage.local.set(data, function() {
+					console.log("Saved!", obj);
+				});
+			}
+			
 		};
 		
 		LocalStorageAdapter.prototype.get = function(id, callback){
@@ -2804,6 +2814,11 @@ module.exports = {
 
 		function SeriesCollection(){
 			this.series = [];
+			this.episodesUpdated = false;
+			this.seasonsUpdated = false;
+			this.showsToUpdate = 0;
+			this.numOfShowsUpdated = 0;
+			this.showsUpdated = [];
 			adapter.get(null, null);
 		}
 		var seriesCollection = new SeriesCollection();
@@ -2842,10 +2857,156 @@ module.exports = {
 
 		SeriesCollection.prototype.populateView = function(data){
 			var that = this;
+			var lastUpdate = null;
 			_.each(data, function(element, index, list){
-				that.add(element);
+				console.log(element);
+				if(element.id > 0){
+					that.add(element);
+				}else{
+					lastUpdate = new Date(element.lastUpdate);
+				}
 			});
-			seriesListView.render();
+
+			if(_.isNull(lastUpdate)){
+				adapter.save({
+					id: -1,
+					lastUpdate: new Date( ).toDateString()
+				});
+				seriesListView.render();
+			}else{
+				that.updateShowsInProduction(lastUpdate);
+			}
+			// seriesListView.render();
+		};
+
+		SeriesCollection.prototype.updateShowsInProduction = function(lastUpdate){
+			var that = this;
+			var now = Date.now();
+			var past = new Date(lastUpdate).getTime();
+			// if Math.abs(now - past) > 518400000
+			if(true){
+				mainView.activateOverlay();
+				that.showsToUpdate = _.where(that.series, {inProduction: true}).length;
+				console.log("Shows to update: ", that.showsToUpdate);
+				_.each(this.series, function(element, index, list){
+					if(element.inProduction){
+						that.updateShowInProduction(element);
+					}
+				});
+			}else{
+				seriesListView.render();
+			}
+		};
+
+		SeriesCollection.prototype.updateShowInProduction = function(show){
+			var that = this;
+			var url = "http://api.themoviedb.org/3/tv/" + show.id + "?api_key=" + _key;
+			
+			$.get(url, function(data) {
+				var seasons = data.seasons;
+				if(seasons[0].season_number === 0){
+					seasons.splice(0, 1); // season 0 does not exist in reality
+				}
+
+				var numOfLatestEpisodes = show.seasons[show.seasons.length - 1].episodes.length;
+				var latestSeason = show.seasons[show.seasons.length - 1].number;
+
+				console.log(numOfLatestEpisodes, latestSeason);
+
+				// fetch new episodes
+				if(seasons[latestSeason - 1].episode_count > numOfLatestEpisodes){
+					var episodeRequests = [];
+					for(var i = numOfLatestEpisodes + 1; i <= seasons[latestSeason - 1].episode_count; i++){
+						episodeRequests.push(that.createAjax(show, latestSeason, i));
+					}
+					$.when.apply($, episodeRequests).done(function(){
+						$.each(arguments, function(i, data) {
+							data = data[0];
+							var episode = new EpisodeModel({
+								id: data.id,
+								name: data.name,
+								date: data.air_date,
+								seriesId: show.id,
+								seasonId: show.seasons[show.seasons.length - 1].id,
+								number: data.episode_number
+							});
+							show.seasons[show.seasons.length - 1].episodes.push(episode);
+						});
+						that.showsUpdated.push(show.id);
+						show.seasons[show.seasons.length - 1].episodeCount = seasons[latestSeason - 1].episode_count;
+						that.updateFinished(true, that.seasonsUpdated);
+						// updated episodes
+					});
+				}else{
+					that.updateFinished(true, that.seasonsUpdated);
+				}
+
+				// fetch new seasons
+				if(seasons.length > show.seasons.length){
+					var episodeRequests = [];
+					for(var i = show.seasons.length; i < seasons.length; i++){
+						var season = new SeasonModel({
+							id: seasons[i].id,
+							number: seasons[i].season_number,
+							episodeCount: seasons[i].episode_count,
+							seriesId: show.id,
+							episodes: []
+						});
+						show.seasons.push(season);
+					}
+
+					for(var j = latestSeason; j < show.seasons.length; j++){
+						for(var i = 1; i <= seasons[j].episode_count; i++){
+							episodeRequests.push(that.createAjax(show, j + 1, i));
+						}
+					}
+
+					$.when.apply($, episodeRequests).done(function(){
+						var seasonCounter = latestSeason - 1;
+						$.each(arguments, function(i, data) {
+							data = data[0];
+							if(data.episode_number === 1){
+								seasonCounter++;
+							}
+							var episode = new EpisodeModel({
+								id: data.id,
+								name: data.name,
+								date: data.air_date,
+								seriesId: show.id,
+								seasonId: seasons[seasonCounter].id,
+								number: data.episode_number
+							});
+							show.seasons[seasonCounter].episodes.push(episode);
+						});
+						that.showsUpdated.push(show.id);
+						that.updateFinished(that.episodesUpdated, true);
+					});
+				}else{
+					that.updateFinished(that.episodesUpdated, true);
+				}
+			});
+			this.numOfShowsUpdated++;
+		};
+
+		SeriesCollection.prototype.updateFinished = function(areEpisodesUpdated, areSeasonsUpdated){
+			var that = this;
+			this.episodesUpdated = areEpisodesUpdated;
+			this.seasonsUpdated = areSeasonsUpdated;
+			if(this.episodesUpdated && this.seasonsUpdated && (this.numOfShowsUpdated >= this.showsToUpdate)){
+				this.showsUpdated = _.uniq(this.showsUpdated);
+				_.each(this.showsUpdated, function(element, index, list){
+					var show = _.find(that.series, function(elem){
+						return elem.id === element;
+					});
+					adapter.save(show);
+				});
+				seriesListView.render();
+			}
+		};
+
+		SeriesCollection.prototype.createAjax = function(series, seasonNumber, episodeNumber){
+			var url = "http://api.themoviedb.org/3/tv/" + series.id + "/season/" + seasonNumber + "/episode/" + episodeNumber + "?api_key=" + _key;
+			return $.get(url);
 		};
 
 		SeriesCollection.prototype.update = function(show){
@@ -2914,6 +3075,24 @@ module.exports = {
 					this.backToMain.addClass('mui-hide');
 				}
 			}
+		};
+
+		MainView.prototype.activateOverlay = function(){
+		    var modalEl = document.createElement('div');
+		    modalEl.style.width = '43px';
+		    modalEl.style.height = '11px';
+		    modalEl.style.margin = '100px auto';
+
+		    modalEl.innerHTML = "<img src='assets/loading.gif'/>";
+
+		    mui.overlay('on', {
+		    	'keyboard': false,
+		    	'static': true
+		    }, modalEl);
+		};
+
+		MainView.prototype.deactivateOverlay = function(){
+			mui.overlay('off');
 		};
 
 
@@ -3104,7 +3283,7 @@ module.exports = {
 			});
 			mainView.getElement().on('click', '.add', function(event) {
 				event.preventDefault();
-				that.activateOverlay();
+				mainView.activateOverlay();
 				$(this).attr('disabled', 'true');
 				$(this).html(that.messages.adddedSeries);
 				var seriesId = $(this).parents('li').attr('id');
@@ -3128,24 +3307,6 @@ module.exports = {
 		SearchView.prototype.render = function(){
 			mainView.toggleNavigation(true);
 			mainView.render(this.template({results: this.model.get("results")}));
-		};
-
-		SearchView.prototype.activateOverlay = function(){
-		    var modalEl = document.createElement('div');
-		    modalEl.style.width = '43px';
-		    modalEl.style.height = '11px';
-		    modalEl.style.margin = '100px auto';
-
-		    modalEl.innerHTML = "<img src='assets/loading.gif'/>";
-
-		    mui.overlay('on', {
-		    	'keyboard': false,
-		    	'static': true
-		    }, modalEl);
-		};
-
-		SearchView.prototype.deactivateOverlay = function(){
-			mui.overlay('off');
 		};
 
 		SearchView.prototype.search = function(){

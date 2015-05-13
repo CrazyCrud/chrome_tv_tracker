@@ -1,11 +1,24 @@
-chrome.app.runtime.onLaunched.addListener(function() {
+chrome.browserAction.onClicked.addListener(function() {
+	console.log("Background!", "onClick", chrome.runtime);
+
+	chrome.browserAction.setPopup({
+		popup: 'popup.html'
+	});
+
+	chrome.alarms.create('watchnext-alarm', {
+		when: Date.now()
+	});
+
 	/*
-	chrome.app.window.create('../chromeindex.html', {
-		'bounds': {
-			'width': 600,
-			'height': 700
-		}
+	chrome.runtime.connect({
+
 	});
 	*/
-	console.log("Background!");
+});
+
+
+chrome.alarms.onAlarm.addListener(function(){
+	console.log("onAlarm");
+
+	
 });
