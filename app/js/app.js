@@ -159,7 +159,6 @@ var Watchnext = (function(){
 			}else{
 				that.updateShowsInProduction(lastUpdate);
 			}
-			// seriesListView.render();
 		};
 
 		SeriesCollection.prototype.updateShowsInProduction = function(lastUpdate){
@@ -418,6 +417,15 @@ var Watchnext = (function(){
 			mainView.toggleNavigation(false);
 			mainView.render(this.template({seriesList: this.collection.get("series")}));
 
+			var showsThisWeek = $(".continues-this-week").length;
+			var badges = "";
+			if(showsThisWeek > 0){
+				badges += showsThisWeek;
+			}
+			chrome.browserAction.setBadgeText({
+				text: badges
+			});
+			
 			_state = -1;
 			_isSearching = false;
 		};

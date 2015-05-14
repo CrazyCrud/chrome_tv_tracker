@@ -1,12 +1,12 @@
 {
-    "name": "Watch' Next",
+    "name": "Watch Doges",
     "description": "An extension that reminds you of upcoming episodes of your favorite tv shows.",
     "version": "0.1",
     "manifest_version": 2,
     "browser_action": {
         "default_icon": {
-            "19": "assets/favicon-19.png",
-            "38": "assets/favicon-38.png"
+            "19": "assets/favicon-19_2.png",
+            "38": "assets/favicon-38_2.png"
         },
         "default_title": "Watch' Next",
         "default_popup": "popup.html"
