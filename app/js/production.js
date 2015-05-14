@@ -2883,8 +2883,7 @@ module.exports = {
 			var that = this;
 			var now = Date.now();
 			var past = new Date(lastUpdate).getTime();
-			// if Math.abs(now - past) > 518400000
-			if(true){
+			if(Math.abs(now - past) > 518400000){
 				mainView.activateOverlay();
 				that.showsToUpdate = _.where(that.series, {inProduction: true}).length;
 				_.each(this.series, function(element, index, list){
@@ -3002,6 +3001,10 @@ module.exports = {
 				if(this.showsUpdated.length < 1){
 					mainView.deactivateOverlay();
 				}
+				adapter.save({
+					id: -1,
+					lastUpdate: new Date( ).toDateString()
+				});
 				seriesListView.render();
 			}else{
 				mainView.deactivateOverlay();
@@ -3172,6 +3175,7 @@ module.exports = {
 
 			this.applyEvents();
 			this.applyCheckboxStyle();
+			this.checkWatchedEpisodes();
 
 			_state = this.model.id;
 			_isSearching = false;
@@ -3190,35 +3194,10 @@ module.exports = {
 			    var seasonIndex = $(this).attr('data-season');
 			    seriesCollection.updateWatchedStatus(that.model.id, parseInt(seasonIndex, 10), parseInt(episodeIndex, 10), this.checked);
 
-			    var svg = $(this).next('svg'),
-			    	paths = [];
-			    paths.push(document.createElementNS('http://www.w3.org/2000/svg', 'path' ));
 			    if(this.checked){
-			    	for(var i = 0, len = paths.length; i < len; ++i) {
-						var path = paths[i];
-						svg.append(path);
-
-						path.setAttributeNS( null, 'd', that.pathDef);
-
-						var length = path.getTotalLength();
-						// Clear any previous transition
-						//path.style.transition = path.style.WebkitTransition = path.style.MozTransition = 'none';
-						// Set up the starting positions
-						path.style.strokeDasharray = length + ' ' + length;
-						if( i === 0 ) {
-							path.style.strokeDashoffset = Math.floor( length ) - 1;
-						}
-						else path.style.strokeDashoffset = length;
-						// Trigger a layout so styles are calculated & the browser
-						// picks up the starting position before animating
-						path.getBoundingClientRect();
-						// Define our transition
-						path.style.transition = path.style.WebkitTransition = path.style.MozTransition  = 'stroke-dashoffset ' + that.animDef.speed + 's ' + that.animDef.easing + ' ' + i * that.animDef.speed + 's';
-						// Go!
-						path.style.strokeDashoffset = '0';
-					}
+			    	that.drawPath(this);
 			    }else{
-			    	svg.children('path').remove();
+			    	that.removePath(this);
 			    }
 			});
 
@@ -3236,6 +3215,49 @@ module.exports = {
 			$(".watched-episode").each(function(index) {
 				$(this).after(that.createSVG());
 			});
+		};
+
+		DetailView.prototype.checkWatchedEpisodes = function(){
+			var that = this;
+			$(".watched-episode").each(function(index, el) {
+				if(this.checked){
+					that.drawPath(this);
+				}
+			});
+		};
+
+		DetailView.prototype.drawPath = function(checkbox){
+			var that = this;
+			var svg = $(checkbox).next('svg'),
+			    paths = [];
+			paths.push(document.createElementNS('http://www.w3.org/2000/svg', 'path' ));
+			for(var i = 0, len = paths.length; i < len; ++i) {
+				var path = paths[i];
+				svg.append(path);
+
+				path.setAttributeNS( null, 'd', that.pathDef);
+
+				var length = path.getTotalLength();
+
+				path.style.strokeDasharray = length + ' ' + length;
+				if( i === 0 ) {
+					path.style.strokeDashoffset = Math.floor( length ) - 1;
+				}
+				else {
+					path.style.strokeDashoffset = length;
+				}
+
+				path.getBoundingClientRect();
+
+				path.style.transition = path.style.WebkitTransition = path.style.MozTransition  = 'stroke-dashoffset ' + that.animDef.speed + 's ' + that.animDef.easing + ' ' + i * that.animDef.speed + 's';
+
+				path.style.strokeDashoffset = '0';
+			}
+		};
+
+		DetailView.prototype.removePath = function(checkbox){
+			var svg = $(checkbox).next('svg');
+			svg.children('path').remove();
 		};
 
 		DetailView.prototype.createSVG = function(){

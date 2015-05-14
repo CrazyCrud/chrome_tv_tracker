@@ -34,17 +34,6 @@
 			</div>
 		</div>
 	</div>
-	<script type="text/html" id="template-episode">
-		<div class="episode">
-			<span><%- number %>.<%- name %></span>
-			<div class="mui-checkbox">
-				<label>
-				<input type="checkbox" value="" <% if(watched){ %> checked <% } %>>
-					Watched
-				</label>
-			</div>
-		</div>
-	</script>
 	<script type="text/html" id="template-details">
 		<div class="mui-panel info">
 			<div class="series-image">
@@ -137,7 +126,27 @@
 					<% } %>
 					</div>
 					<div class="series-name">
-						<h5><%- element.name %></h5>
+						<% 
+						var now = Date.now(),
+							soonest = now,
+							nextEpisode = null,
+							day = null;
+						_.each(element.seasons, function(season, indexSeason, listSeason){ 
+							_.each(season.episodes, function(episode, indexEpisode, list){
+								var episodeDate = new Date(episode.date);
+								if((episodeDate.getTime() - now < soonest) && (episodeDate.getTime() - now > 0)){
+									soonest = episodeDate.getTime() - now;
+									nextEpisode = episode;
+								}
+							});
+						});
+						var date = new Date(nextEpisode.date);
+						if(date.getTime() < (now + 518400000)){
+							var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+							day = days[parseInt(date.getUTCDay(), 10)];
+						}
+						%>
+						<h5><%- element.name %><% if(!_.isNull(day)){%><span class="continues-this-week mui-text-caption">&#32;&#32;Continues on <%= day %></span><%}%></h5>
 						<button class="details mui-btn mui-btn-primary">Show details</button>
 						<button class="delete mui-btn mui-btn-primary">Delete</button>
 					</div>
