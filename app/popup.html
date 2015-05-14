@@ -129,6 +129,7 @@
 						<% 
 						var now = Date.now(),
 							soonest = now,
+							date = null,
 							nextEpisode = null,
 							day = null;
 						_.each(element.seasons, function(season, indexSeason, listSeason){ 
@@ -140,8 +141,12 @@
 								}
 							});
 						});
-						var date = new Date(nextEpisode.date);
-						if(date.getTime() < (now + 518400000)){
+
+						if(!_.isNull(nextEpisode)){
+							date = new Date(nextEpisode.date);
+						}
+						
+						if((!_.isNull(date)) && (date.getTime() < (now + 518400000))){
 							var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 							day = days[parseInt(date.getUTCDay(), 10)];
 						}
