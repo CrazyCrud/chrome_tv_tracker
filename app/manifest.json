@@ -1,6 +1,6 @@
 {
   "name": "Watch Doge",
-  "description": "An extension that reminds you of upcoming episodes of your favorite tv shows.",
+  "description": "An extension that keeps track of episodes of your favorite tv shows you have watched and which reminds you of upcoming episodes, too.",
   "version": "1.0",
   "manifest_version": 2,
   "browser_action": {
@@ -10,6 +10,11 @@
     },
     "default_title": "Watch Doge",
     "default_popup": "popup.html"
+  },
+  "icons": { 
+    "16": "assets/favicon-16.png",
+    "48": "assets/favicon-48.png",
+    "128": "assets/favicon-128.png" 
   },
   "background": {
     "scripts": ["js/background.js"]
