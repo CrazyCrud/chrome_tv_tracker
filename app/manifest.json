@@ -1,6 +1,6 @@
 {
   "name": "Watch Doge",
-  "description": "An extension that keeps track of episodes of your favorite tv shows you have watched and which reminds you of upcoming episodes, too.",
+  "description": "An extension that keeps track of episodes of your favorite tv shows you have watched and which reminds you of upcoming episodes, too. (Icon by Jonah Bethlehem)",
   "version": "1.0",
   "manifest_version": 2,
   "browser_action": {
