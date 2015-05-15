@@ -188,6 +188,12 @@ var Watchnext = (function(){
 					seasons.splice(0, 1); // season 0 does not exist in reality
 				}
 
+				if(show.inProduction !== data.in_production){
+					show.inProduction = data.in_production;	
+					adapter.save(show);
+				}
+				
+
 				var numOfLatestEpisodes = show.seasons[show.seasons.length - 1].episodes.length;
 				var latestSeason = show.seasons[show.seasons.length - 1].number;
 
