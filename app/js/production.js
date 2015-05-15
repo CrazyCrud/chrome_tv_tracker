@@ -2746,7 +2746,7 @@ module.exports = {
 		};
 
 		/* Localstorage adapter */
-		var LocalStorageAdapter = function(show){
+		var LocalStorageAdapter = function(){
 			
 		};
 		var adapter = new LocalStorageAdapter();
@@ -3177,15 +3177,17 @@ module.exports = {
 		SeriesListView.prototype.render = function(){
 			mainView.toggleNavigation(false);
 			mainView.render(this.template({seriesList: this.collection.get("series")}));
-
+			/*
 			var showsThisWeek = $(".continues-this-week").length;
 			var badges = "";
 			if(showsThisWeek > 0){
 				badges += showsThisWeek;
 			}
+			
 			chrome.browserAction.setBadgeText({
 				text: badges
 			});
+			*/
 			
 			_state = -1;
 			_isSearching = false;
@@ -3490,8 +3492,11 @@ module.exports = {
 						that.fetchEpisode(series, j, i);
 					}
 				}
-			}, 'json').
-			done(function(){
+			}, 'json')
+			.fail(function() {
+				mainView.deactivateOverlay();
+			})
+			.done(function(){
 				// nothing to do here...
 			});
 		};
