@@ -89,7 +89,7 @@ var Watchnext = (function(){
 			this.image = attrs.image || null;
 			this.date = attrs.date || null;
 			this.numberOfEpisodes = attrs.numberOfEpisodes || null;
-			this.remind = attrs.remind || false;
+			this.currentSeason = attrs.currentSeason || -1;
 			this.inProduction = attrs.inProduction || false;
 			this.seasons = [];
 		}
@@ -321,6 +321,7 @@ var Watchnext = (function(){
 
 			}
 			show.seasons[seasonIndex].episodes[episodeIndex].watched = yep;
+			show.currentSeason = seasonIndex + 1;
 			this.update(show);
 		};
 
@@ -473,6 +474,7 @@ var Watchnext = (function(){
 			this.applyEvents();
 			this.applyCheckboxStyle();
 			this.checkWatchedEpisodes();
+			this.expandCurrentSeasons();
 
 			_state = this.model.id;
 			_isSearching = false;
@@ -497,13 +499,6 @@ var Watchnext = (function(){
 			    	that.removePath(this);
 			    }
 			});
-
-			/*
-			$(".watched-season").change(function() {
-			    var seasonIndex = $(this).attr('data-season');
-			    seriesCollection.updateWatchedStatus(that.model.id, parseInt(seasonIndex, 10), null, this.checked);
-			});
-			*/
 		};
 
 		DetailView.prototype.applyCheckboxStyle = function(){
@@ -521,6 +516,20 @@ var Watchnext = (function(){
 					that.drawPath(this);
 				}
 			});
+		};
+
+		DetailView.prototype.expandCurrentSeasons = function(){
+			var currentSeason = this.model.currentSeason;
+			if(currentSeason > -1){
+				var listItem = $("ul.list-seasons").children('li')[currentSeason -1];
+				
+				var click = _.bind(function(){
+					$(this).find('.expand').trigger('click');
+				}, listItem);
+				_.delay(click, 80);
+				
+				// $(listItem).find('.expand').trigger('click');
+			}
 		};
 
 		DetailView.prototype.drawPath = function(checkbox){
