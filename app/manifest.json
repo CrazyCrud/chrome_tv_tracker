@@ -1,7 +1,7 @@
 {
   "name": "Watch Doge",
   "description": "An extension that reminds you of upcoming episodes of your favorite tv shows.",
-  "version": "0.2",
+  "version": "1.0",
   "manifest_version": 2,
   "browser_action": {
     "default_icon": {                   
@@ -15,7 +15,6 @@
     "scripts": ["js/background.js"]
   },
   "permissions": [
-    "background",
     "contextMenus",
     "storage",
     "unlimitedStorage"
