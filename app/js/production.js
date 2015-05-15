@@ -2726,8 +2726,24 @@ module.exports = {
 		seriesList: $(".list-series")
 	},
 	init = function(){
-		
+		var ErrorMsg = function(){
+			this.msgs = {
+				0: "I'm sorry, an error occured, try to restart the application again",
+				1: ""
+			};
+		};
+		var errorMsg = new ErrorMsg();
 
+		ErrorMsg.prototype.createMsg = function(number, error){
+			var msg = this.msgs[0];
+			if(!_.isNull(number) && !_.isUndefined(number)){
+				msg += this.msgs[number];
+			}
+			if(!_.isNull(error) && !_.isUndefined(error)){
+				msg += "</br><em>" + error + "</em>";
+			}
+			return msg;
+		};
 
 		/* Localstorage adapter */
 		var LocalStorageAdapter = function(show){
@@ -2741,12 +2757,11 @@ module.exports = {
 			data[key] = obj;
 			if(obj.id > 0){
 				chrome.storage.local.set(data, function() {
-					console.log("Saved!", obj);
 					mainView.deactivateOverlay();
 				});
 			}else{
 				chrome.storage.local.set(data, function() {
-					console.log("Saved!", obj);
+
 				});
 			}
 			
@@ -2819,6 +2834,7 @@ module.exports = {
 			this.showsToUpdate = 0;
 			this.numOfShowsUpdated = 0;
 			this.showsUpdated = [];
+
 			adapter.get(null, null);
 		}
 		var seriesCollection = new SeriesCollection();
@@ -2858,8 +2874,14 @@ module.exports = {
 		SeriesCollection.prototype.populateView = function(data){
 			var that = this;
 			var lastUpdate = null;
+
+			if(_.has(data, 'message')){
+				console.log(data.message);
+				$('.main-section').html(errorMsg.createMsg(null, data.message));
+				return;
+			}
+
 			_.each(data, function(element, index, list){
-				console.log(element);
 				if(element.id > 0){
 					that.add(element);
 				}else{
@@ -2910,6 +2932,10 @@ module.exports = {
 					adapter.save(show);
 				}
 				
+				if(show.seasons.length < 1){
+					seriesListView.render();
+					return;
+				}
 
 				var numOfLatestEpisodes = show.seasons[show.seasons.length - 1].episodes.length;
 				var latestSeason = show.seasons[show.seasons.length - 1].number;
@@ -3001,6 +3027,9 @@ module.exports = {
 					var show = _.find(that.series, function(elem){
 						return elem.id === element;
 					});
+					if(_.isUndefined(show)){
+						return;
+					}
 					adapter.save(show);
 				});
 				if(this.showsUpdated.length < 1){
@@ -3032,11 +3061,10 @@ module.exports = {
 				return seriesId == element.id;
 			});
 
-			if(_.isNull(episodeIndex)){
-
-			}else{
-
+			if(_.isUndefined(show)){
+				return;
 			}
+
 			show.seasons[seasonIndex].episodes[episodeIndex].watched = yep;
 			show.currentSeason = seasonIndex + 1;
 			this.update(show);
@@ -3059,6 +3087,10 @@ module.exports = {
 					var series = _.find(seriesCollection.get("series"), function(element){
 						return _state == element.id;
 					});
+
+					if(_.isUndefined(series)){
+						series = new SeriesModel();
+					}
 
 					var detailView = new DetailView({
 						model: series
@@ -3131,6 +3163,11 @@ module.exports = {
 				var index = _.findIndex(that.collection.get("series"), function(element){
 					return seriesId == element.id;
 				});
+
+				if(index === -1){
+					return;
+				}
+
 				var series = that.collection.get("series")[index];
 				that.showDetails(series);
 			});
@@ -3319,7 +3356,8 @@ module.exports = {
 		var SearchView = function(options){
 			this.element = $("#query-series");
 			this.messages = {
-				adddedSeries: "Added..."
+				adddedSeries: "Added...",
+				alreadyAdded: "Already added..."
 			};
 			this.ajaxCounter = 0;
 
@@ -3341,6 +3379,21 @@ module.exports = {
 				var series = _.find(that.model.get("results"), function(element){
 					return element.id == seriesId;
 				});
+				if(_.isUndefined(series)){
+					return;
+				}
+
+				var isSaved = _.find(seriesCollection.series, function(element){
+					return element.id == seriesId;
+				});
+
+				if(!_.isUndefined(isSaved)){
+					$(this).attr('disabled', 'true');
+					$(this).html(that.messages.alreadyAdded);
+					mainView.deactivateOverlay();
+					return;
+				}
+
 				that.fetchShow(series);
 			});
 
