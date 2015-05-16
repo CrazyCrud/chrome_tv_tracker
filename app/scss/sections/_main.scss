@@ -96,10 +96,65 @@
 		
 		.season-number{
 			margin-bottom: 6px;
-			.mui-checkbox{
+		}
+
+		.mui-checkbox{
+			position: absolute;
+			right: -46px;
+			top: -8px;
+
+			input[type="checkbox"]{
+				width: 15px;
+				height: 15px;
+				opacity: 0;
+				-webkit-appearance: none;
+				z-index: 100;
+			}
+
+			input[type="checkbox"]:checked + label{
+				opacity: 0.8;
+				color: #222;
+			}
+
+			label::before{
+				content: '';
 				position: absolute;
-				right: 14px;
-				top: -8px;
+				top: 2px;
+				right: 26px;
+				width: 15px;
+				height: 15px;
+				border: 1px solid #222;
+				-webkit-transition: opacity 0.3s;
+			}
+
+			label{
+				position: relative;
+			}
+
+			svg{
+				position: absolute;
+				top: 6px;
+				right: 28px;
+				width: 11px;
+				height: 11px;
+				pointer-events: none;
+			}
+
+			svg path{
+				stroke: #222;
+				stroke-width: 20px;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+				fill: none;
+			}
+		}
+
+		.mui-checkbox.checkmark-season{
+			right: 14px;
+			top: -6px;
+
+			svg{
+				top: 4px;
 			}
 		}
 
@@ -111,57 +166,6 @@
 			li{
 				position: relative;
 				line-height: 34px;
-
-				.mui-checkbox{
-					position: absolute;
-					right: -46px;
-					top: -8px;
-
-					input[type="checkbox"]{
-						width: 15px;
-						height: 15px;
-						opacity: 0;
-						-webkit-appearance: none;
-						z-index: 100;
-					}
-
-					input[type="checkbox"]:checked + label{
-						opacity: 0.8;
-						color: #222;
-					}
-
-					label::before{
-						content: '';
-						position: absolute;
-						top: 2px;
-						right: 26px;
-						width: 15px;
-						height: 15px;
-						border: 1px solid #222;
-						-webkit-transition: opacity 0.3s;
-					}
-
-					label{
-						position: relative;
-					}
-
-					svg{
-						position: absolute;
-						top: 6px;
-						right: 28px;
-						width: 11px;
-						height: 11px;
-						pointer-events: none;
-					}
-
-					svg path{
-						stroke: #222;
-						stroke-width: 20px;
-						stroke-linecap: round;
-						stroke-linejoin: round;
-						fill: none;
-					}
-				}
 			}
 
 			.mui-divider{

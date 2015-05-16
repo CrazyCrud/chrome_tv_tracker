@@ -349,7 +349,7 @@ var Watchnext = (function(){
 			}
 
 			show.seasons[seasonIndex].episodes[episodeIndex].watched = yep;
-			show.currentSeason = seasonIndex + 1;
+			show.currentSeason = seasonIndex + 1;		
 			this.update(show);
 		};
 
@@ -460,7 +460,7 @@ var Watchnext = (function(){
 		SeriesListView.prototype.render = function(){
 			mainView.toggleNavigation(false);
 			mainView.render(this.template({seriesList: this.collection.get("series")}));
-			/*
+
 			var showsThisWeek = $(".continues-this-week").length;
 			var badges = "";
 			if(showsThisWeek > 0){
@@ -470,7 +470,7 @@ var Watchnext = (function(){
 			chrome.browserAction.setBadgeText({
 				text: badges
 			});
-			*/
+			
 			
 			_state = -1;
 			_isSearching = false;
@@ -528,9 +528,57 @@ var Watchnext = (function(){
 			});		
 
 			$(".watched-episode").change(function() {
+				var parentListItem = $(this).parents('li.single-season');
 			    var episodeIndex = $(this).attr('data-episode');
 			    var seasonIndex = $(this).attr('data-season');
 			    seriesCollection.updateWatchedStatus(that.model.id, parseInt(seasonIndex, 10), parseInt(episodeIndex, 10), this.checked);
+
+			    var seasonCheckbox = $(this).parents('li.single-season').find('.watched-season');
+			    if(this.checked){
+			    	that.drawPath(this);
+			    	var checkboxes = parentListItem.find('ul.list-episodes .watched-episode');
+			    	var allChecked = true;
+
+			    	_.each(checkboxes, function(checkbox, index, list){
+			    		if($(checkbox)[0].checked === false){
+			    			allChecked = false;
+			    		}
+			    	});
+			    	if(allChecked){
+			    		seasonCheckbox[0].checked = true;
+			    		that.drawPath(seasonCheckbox);
+			    	}
+			    }else{
+			    	if(seasonCheckbox[0].checked){
+			    		seasonCheckbox[0].checked = false;
+			    		that.removePath(seasonCheckbox);
+			    	}
+			    	that.removePath(this);
+			    }
+			});
+
+			$(".watched-season").change(function() {
+				var other = this;
+			    var seasonIndex = $(this).attr('data-season');
+			    var parentListItem = $(this).parents('li.single-season');
+			    var checkboxes = parentListItem.find('ul.list-episodes .watched-episode');
+
+			    _.each(checkboxes, function(checkbox, index, list){
+			    	var state = $(checkbox)[0].checked;
+			    	if(other.checked){
+			    		if(state === false){
+				    		$(checkbox).trigger('click');
+				    	}
+				    }else{
+				    	
+				    	if(state === true){
+				    		$(checkbox).trigger('click');
+				    	}
+				    }
+			    });
+			    /*
+			    seriesCollection.updateWatchedStatus(that.model.id, parseInt(seasonIndex, 10), parseInt(episodeIndex, 10), this.checked);
+				*/
 
 			    if(this.checked){
 			    	that.drawPath(this);
@@ -546,11 +594,20 @@ var Watchnext = (function(){
 			$(".watched-episode").each(function(index) {
 				$(this).after(that.createSVG());
 			});
+
+			$(".watched-season").each(function(index) {
+				$(this).after(that.createSVG());
+			});
 		};
 
 		DetailView.prototype.checkWatchedEpisodes = function(){
 			var that = this;
 			$(".watched-episode").each(function(index, el) {
+				if(this.checked){
+					that.drawPath(this);
+				}
+			});
+			$(".watched-season").each(function(index, el) {
 				if(this.checked){
 					that.drawPath(this);
 				}

@@ -74,22 +74,33 @@
 					No episodes are coming...
 				<% } %>
 			</div>
+
 			<div class="clear"></div>
 		</div>
 		<ul class="list-seasons" id="<%= series.id %>">
 			<% _.each(series.seasons, function(season, indexSeason, listSeason){ %>
 				<% if(season.episodes.length < 1){ return; } %>
 				<li id="<%= season.id %>" class="single-season">
+					<div class="mui-checkbox checkmark checkmark-season">
+						<%  var allChecked = true;
+							_.each(season.episodes, function(episode, indexEpisode, list){ 
+								if(!episode.watched){
+									allChecked = false;
+								}
+							});
+						%>
+
+						
+						<input class="watched-season" type="checkbox" data-season="<%= indexSeason %>"
+							<% if(allChecked){ %>
+								checked
+							<% } %>
+						>
+						<label>	
+						</label>
+					</div>
 					<div class="season-number">
 						<span><%- season.number %>. Season</span>
-						<!--
-						<div class="mui-checkbox">
-							<label>
-							<input class="watched-season" type="checkbox" value="" data-season="<%= indexSeason %>">
-								Watched
-							</label>
-						</div>
-						-->
 					</div>
 					<div>
 						<% if(season.episodes.length > 0){ %>
@@ -102,13 +113,15 @@
 						<ul class="list-episodes">
 							<% _.each(season.episodes, function(episode, indexEpisode, list){ %>
 								<li id="<%= episode.id %>" class="episode">
-									<%= indexEpisode + 1 %>.<%= episode.name %>
+									<%= indexEpisode + 1 %>.&#32;<%= episode.name %>
 									<div class="mui-checkbox checkmark">
-										<input name="cb-<%= indexEpisode %>" class="watched-episode" type="checkbox" value="" data-episode="<%= indexEpisode %>" data-season="<%= indexSeason %>"
+										<input name="cb-<%= indexEpisode %>" class="watched-episode" type="checkbox" data-episode="<%= indexEpisode %>" data-season="<%= indexSeason %>"
 											<% if(episode.watched){ %>
-												checked="true"
+												checked
+											<% }else{ %>
+												
 											<% } %>
-										>
+										>	
 										<label>	
 										</label>
 									</div>
