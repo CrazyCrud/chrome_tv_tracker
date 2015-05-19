@@ -60,7 +60,7 @@
 }
 
 .series-name{
-	width: 292px;
+	width: 342px;
 	line-height: 26px;
 	h5{
 		margin-bottom: 0;
@@ -109,6 +109,7 @@
 				opacity: 0;
 				-webkit-appearance: none;
 				z-index: 100;
+				cursor: pointer;
 			}
 
 			input[type="checkbox"]:checked + label{
@@ -166,6 +167,7 @@
 			li{
 				position: relative;
 				line-height: 34px;
+				cursor: pointer;
 			}
 
 			.mui-divider{

@@ -3232,6 +3232,7 @@ module.exports = {
 			this.checkWatchedEpisodes();
 			this.expandCurrentSeasons();
 
+
 			_state = this.model.id;
 			_isSearching = false;
 		};
@@ -3245,6 +3246,7 @@ module.exports = {
 			});		
 
 			$(".watched-episode").change(function() {
+				console.log(this.checked);
 				var parentListItem = $(this).parents('li.single-season');
 			    var episodeIndex = $(this).attr('data-episode');
 			    var seasonIndex = $(this).attr('data-season');
@@ -3274,6 +3276,11 @@ module.exports = {
 			    }
 			});
 
+			$(".watched-episode").click(function(event) {
+				event.stopPropagation();
+			});
+		
+
 			$(".watched-season").change(function() {
 				var other = this;
 			    var seasonIndex = $(this).attr('data-season');
@@ -3293,9 +3300,6 @@ module.exports = {
 				    	}
 				    }
 			    });
-			    /*
-			    seriesCollection.updateWatchedStatus(that.model.id, parseInt(seasonIndex, 10), parseInt(episodeIndex, 10), this.checked);
-				*/
 
 			    if(this.checked){
 			    	that.drawPath(this);
@@ -3303,6 +3307,12 @@ module.exports = {
 			    	that.removePath(this);
 			    }
 			});
+			
+			$("li.episode").click(function(event) {
+				var checkbox = $(this).find('input');
+				checkbox.trigger('click');
+			});
+			
 		};
 
 		DetailView.prototype.applyCheckboxStyle = function(){

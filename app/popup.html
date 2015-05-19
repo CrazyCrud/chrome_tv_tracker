@@ -39,23 +39,27 @@
 			<div class="series-image">
 				<% if(!_.isNull(series.image) && series.image.length > 0){ %>
 					<img src="http://image.tmdb.org/t/p/w92<%= series.image %>">
+				<% } else{%>
+					<img src="assets/no_img.png">
 				<% } %>
 			</div>
 			<div class="series-name">
 				<h5><%- series.name %></h5>
 				<% if(series.inProduction){ %>
-					This series is still in production
+					Still in production
 					<span class="continues">
 						<% 
 						var now = Date.now(),
 							soonest = now,
-							nextEpisode = null;
+							nextEpisode = null,
+							nextSeason = null;
 						_.each(series.seasons, function(season, indexSeason, listSeason){ 
 							_.each(season.episodes, function(episode, indexEpisode, list){
 								var episodeDate = new Date(episode.date);
 								if((episodeDate.getTime() - now < soonest) && (episodeDate.getTime() - now > 0)){
 									soonest = episodeDate.getTime() - now;
 									nextEpisode = episode;
+									nextSeason = season;
 								}
 							});
 						});
@@ -65,7 +69,7 @@
 							var dateNextEpisode = new Date(nextEpisode.date);
 							var dateString = days[parseInt(dateNextEpisode.getUTCDay(), 10)] + ", " + months[parseInt(dateNextEpisode.getUTCMonth(), 10)] + " " + dateNextEpisode.getDate();
 							%>
-							and continues on <em><%= dateString %></em>
+							:&#32;Season <%= nextSeason.number %> continues on <em><%= dateString %></em>
 						<%
 						}
 						%>
@@ -113,7 +117,13 @@
 						<ul class="list-episodes">
 							<% _.each(season.episodes, function(episode, indexEpisode, list){ %>
 								<li id="<%= episode.id %>" class="episode">
+									<% if(nextEpisode.id === episode.id){ %>
+										<strong>
+									<% } %>
 									<%= indexEpisode + 1 %>.&#32;<%= episode.name %>
+									<% if(nextEpisode.id === episode.id){ %>
+										</strong>
+									<% } %>
 									<div class="mui-checkbox checkmark">
 										<input name="cb-<%= indexEpisode %>" class="watched-episode" type="checkbox" data-episode="<%= indexEpisode %>" data-season="<%= indexSeason %>"
 											<% if(episode.watched){ %>
@@ -141,6 +151,8 @@
 					<div class="series-image">
 					<% if(!_.isNull(element.image) && element.image.length > 0){ %>
 						<img src="http://image.tmdb.org/t/p/w92<%= element.image %>">
+					<% } else{%>
+						<img src="assets/no_img.png">
 					<% } %>
 					</div>
 					<div class="series-name">
@@ -185,6 +197,8 @@
 					<div class="series-image">
 					<% if(!_.isNull(element.image) && element.image.length > 0){ %>
 						<img src="http://image.tmdb.org/t/p/w92<%= element.image %>">
+					<% } else{%>
+						<img src="assets/no_img.png">
 					<% } %>
 					</div>
 					<div class="series-name">
