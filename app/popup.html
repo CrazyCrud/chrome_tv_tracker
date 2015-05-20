@@ -118,7 +118,7 @@
 							<% _.each(season.episodes, function(episode, indexEpisode, list){ %>
 								<li id="<%= episode.id %>" class="episode">
 									<%= indexEpisode + 1 %>.&#32;<%= episode.name %>
-									<% if(nextEpisode.id === episode.id){ %>
+									<% if(!_.isUndefined(nextEpisode) && nextEpisode.id === episode.id){ %>
 										</br><span class="mui-text-caption">Next Episode</span>
 									<% } %>
 									<div class="mui-checkbox checkmark">
