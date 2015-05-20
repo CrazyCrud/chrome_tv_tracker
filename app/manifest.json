@@ -1,7 +1,7 @@
 {
   "name": "Watch Doge",
   "description": "It keeps track of episodes of your favorite tv shows and reminds you of upcoming episodes. (Original icon by Jonah Bethlehem)",
-  "version": "0.0.0.3",
+  "version": "0.0.0.4",
   "manifest_version": 2,
   "browser_action": {
     "default_icon": {                   

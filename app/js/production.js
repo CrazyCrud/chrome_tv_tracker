@@ -3101,6 +3101,18 @@ module.exports = {
 				}
 				
 			});
+
+			$("body").on('click', '.delete-final', function(event) {
+				var seriesId = $(this).attr('id');
+				var item = that.element.find('li#' + seriesId);
+				item.remove();
+				that.deactivateOverlay();
+				seriesCollection.remove(seriesId);
+				adapter.remove(seriesId);
+			});
+			$("body").on('click', '.delete-abort', function(event) {
+				that.deactivateOverlay();
+			});
 		};
 		var mainView = new MainView();
 
@@ -3198,9 +3210,49 @@ module.exports = {
 			var index = _.findIndex(this.collection.get("series"), function(element){
 				return seriesId == element.id;
 			});
+			var series = _.find(this.collection.get("series"), function(element){
+				return seriesId == element.id;
+			});
+			var name = "";
+			if(!_.isNull(series)){
+				name = series;
+			}
+			this.confirmDialog(seriesId, series.name);
+			/*
 			item.remove();
 			this.collection.remove(seriesId);
 			adapter.remove(seriesId);
+			*/
+		};
+		SeriesListView.prototype.confirmDialog = function(seriesId, name){
+			var that = this;
+			var modalEl = document.createElement('div');
+		    modalEl.style.width = '240px';
+		    modalEl.style.height = '120px';
+		    modalEl.style.margin = '100px auto';
+
+		    var deleteButton = $("<button></button>");
+		    deleteButton.attr('id', seriesId);
+		    deleteButton.addClass('mui-btn mui-btn-danger delete-final');
+		    deleteButton.html("Delete");
+		    
+
+		    var abortButton = $("<button></button>");
+		    abortButton.addClass('mui-btn mui-btn-primary delete-abort');
+		    abortButton.html("Abort");
+
+		    var content = $("<div></div>");
+		    content.addClass('dialog');
+		    content.append("<p>Are you sure you want to delete " + name + "?</p>");
+		    content.append(deleteButton);
+		    content.append(abortButton);
+
+		    modalEl.innerHTML = $("<div />").append($(content).clone()).html();
+
+		    mui.overlay('on', {
+		    	'keyboard': true,
+		    	'static': false
+		    }, modalEl);
 		};
 
 		SeriesListView.prototype.showDetails = function(series){
@@ -3216,7 +3268,9 @@ module.exports = {
 			this.controller = options.controller || null;
 			this.model = options.model || null;
 			this.collection = options.collection || null;
-
+			this.messages = {
+				normal: "Show Episodes", expanded: "Hide Episodes"
+			};
 			this.pathDef = 'M16.667,62.167c3.109,5.55,7.217,10.591,10.926,15.75 c2.614,3.636,5.149,7.519,8.161,10.853c-0.046-0.051,1.959,2.414,2.692,2.343c0.895-0.088,6.958-8.511,6.014-7.3 c5.997-7.695,11.68-15.463,16.931-23.696c6.393-10.025,12.235-20.373,18.104-30.707C82.004,24.988,84.802,20.601,87,16';
 			this.animDef = {
 				speed : 0.2, easing : 'ease-in-out'
@@ -3240,13 +3294,20 @@ module.exports = {
 		DetailView.prototype.applyEvents = function(){
 			var that = this;
 			$(".expand").on('click', function(event) {
+				$(this).html(that.messages.normal);
 				var listItem = $(this).parents('.single-season');
 				listItem.toggleClass('expand');
+				if(listItem.hasClass('expand')){
+					$(this).html(that.messages.expanded);
+				}
 				listItem.siblings().removeClass('expand');
+
+				listItem.siblings().find('.expand').each(function(index, el) {
+					$(el).html(that.messages.normal);
+				});
 			});		
 
 			$(".watched-episode").change(function() {
-				console.log(this.checked);
 				var parentListItem = $(this).parents('li.single-season');
 			    var episodeIndex = $(this).attr('data-episode');
 			    var seasonIndex = $(this).attr('data-season');

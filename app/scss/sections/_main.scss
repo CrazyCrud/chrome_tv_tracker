@@ -79,6 +79,18 @@
 	}
 }
 
+.dialog{
+	background-color: white;
+	padding: 6px 8px 8px;
+	text-align: center;
+
+	button{
+		display: inline-block;
+		margin-right: 4px;
+		margin-left: 4px;
+	}
+}
+
 .info{
 	padding-left: 0;
 	padding-right: 0; 

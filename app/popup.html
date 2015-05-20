@@ -117,12 +117,9 @@
 						<ul class="list-episodes">
 							<% _.each(season.episodes, function(episode, indexEpisode, list){ %>
 								<li id="<%= episode.id %>" class="episode">
-									<% if(nextEpisode.id === episode.id){ %>
-										<strong>
-									<% } %>
 									<%= indexEpisode + 1 %>.&#32;<%= episode.name %>
 									<% if(nextEpisode.id === episode.id){ %>
-										</strong>
+										</br><span class="mui-text-caption">Next Episode</span>
 									<% } %>
 									<div class="mui-checkbox checkmark">
 										<input name="cb-<%= indexEpisode %>" class="watched-episode" type="checkbox" data-episode="<%= indexEpisode %>" data-season="<%= indexSeason %>"
