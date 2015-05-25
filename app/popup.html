@@ -54,14 +54,22 @@
 							nextEpisode = null,
 							nextSeason = null;
 						_.each(series.seasons, function(season, indexSeason, listSeason){ 
-							_.each(season.episodes, function(episode, indexEpisode, list){
-								var episodeDate = new Date(episode.date);
-								if((episodeDate.getTime() - now < soonest) && (episodeDate.getTime() - now > 0)){
-									soonest = episodeDate.getTime() - now;
-									nextEpisode = episode;
-									nextSeason = season;
-								}
-							});
+							if(_.isNull(season)){
+								return;
+							}else{
+								_.each(season.episodes, function(episode, indexEpisode, list){
+									if(_.isNull(episode)){
+										return;
+									}else{
+										var episodeDate = new Date(episode.date);
+										if((episodeDate.getTime() - now < soonest) && (episodeDate.getTime() - now > 0)){
+											soonest = episodeDate.getTime() - now;
+											nextEpisode = episode;
+											nextSeason = season;
+										}
+									}
+								});
+							}
 						});
 						if(!_.isNull(nextEpisode)){ 
 							var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -83,61 +91,65 @@
 		</div>
 		<ul class="list-seasons" id="<%= series.id %>">
 			<% _.each(series.seasons, function(season, indexSeason, listSeason){ %>
-				<% if(season.episodes.length < 1){ return; } %>
-				<li id="<%= season.id %>" class="single-season">
-					<div class="mui-checkbox checkmark checkmark-season">
-						<%  var allChecked = true;
-							_.each(season.episodes, function(episode, indexEpisode, list){ 
-								if(!episode.watched){
-									allChecked = false;
-								}
-							});
-						%>
+				<% if(!_.isNull(season)){ %>
+					<li id="<%= season.id %>" class="single-season">
+						<div class="mui-checkbox checkmark checkmark-season">
+							<%  var allChecked = true;
+								_.each(season.episodes, function(episode, indexEpisode, list){ 
+									if(!_.isNull(episode) && !episode.watched){
+										allChecked = false;
+									}
+								});
+							%>
 
-						
-						<input class="watched-season" type="checkbox" data-season="<%= indexSeason %>"
-							<% if(allChecked){ %>
-								checked
+							
+							<input class="watched-season" type="checkbox" data-season="<%= indexSeason %>"
+								<% if(allChecked){ %>
+									checked
+								<% } %>
+							>
+							<label>	
+							</label>
+						</div>
+						<div class="season-number">
+							<span><%- season.number %>. Season</span>
+						</div>
+						<div>
+							<% if(season.episodes.length > 0){ %>
+								<button class="expand mui-btn mui-btn-primary">Show episodes</button>
+							<% }else{ %>
+								New episodes are coming...
 							<% } %>
-						>
-						<label>	
-						</label>
-					</div>
-					<div class="season-number">
-						<span><%- season.number %>. Season</span>
-					</div>
-					<div>
-						<% if(season.episodes.length > 0){ %>
-							<button class="expand mui-btn mui-btn-primary">Show episodes</button>
-						<% }else{ %>
-							New episodes are coming...
-						<% } %>
-					</div>
-					<div>
-						<ul class="list-episodes">
-							<% _.each(season.episodes, function(episode, indexEpisode, list){ %>
-								<li id="<%= episode.id %>" class="episode">
-									<%= indexEpisode + 1 %>.&#32;<%= episode.name %>
-									<% if(!_.isUndefined(nextEpisode) && nextEpisode.id === episode.id){ %>
-										</br><span class="mui-text-caption">Next Episode</span>
-									<% } %>
-									<div class="mui-checkbox checkmark">
-										<input name="cb-<%= indexEpisode %>" class="watched-episode" type="checkbox" data-episode="<%= indexEpisode %>" data-season="<%= indexSeason %>"
-											<% if(episode.watched){ %>
-												checked
-											<% }else{ %>
-												
+						</div>
+						<div>
+							<ul class="list-episodes">
+								<% _.each(season.episodes, function(episode, indexEpisode, list){ 
+									if(!_.isNull(episode)){
+									%>
+										<li id="<%= episode.id %>" class="episode">
+											<%= indexEpisode + 1 %>.&#32;<%= episode.name %>
+											<% if(!_.isUndefined(nextEpisode) && nextEpisode.id === episode.id){ %>
+												</br><span class="mui-text-caption">Next Episode</span>
 											<% } %>
-										>	
-										<label>	
-										</label>
-									</div>
-								</li>
-								<div class="mui-divider"></div>
-							<% }); %>
-						</ul>
-					</div>
-				</li>
+											<div class="mui-checkbox checkmark">
+												<input name="cb-<%= indexEpisode %>" class="watched-episode" type="checkbox" data-episode="<%= indexEpisode %>" data-season="<%= indexSeason %>"
+													<% if(episode.watched){ %>
+														checked
+													<% }else{ %>
+														
+													<% } %>
+												>	
+												<label>	
+												</label>
+											</div>
+										</li>
+										<div class="mui-divider"></div>
+									<% } %>
+								<% }); %>
+							</ul>
+						</div>
+					</li>
+				<% } %>
 			<% }); %>
 		</ul>
 	</script>
