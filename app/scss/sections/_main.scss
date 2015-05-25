@@ -44,6 +44,10 @@
 	
 }
 
+#mui-overlay{
+	background-color: rgba(0, 0, 0, 0.62);
+}
+
 .series-image, .series-name{
 	display: block;
 }
@@ -89,6 +93,10 @@
 		margin-right: 4px;
 		margin-left: 4px;
 	}
+}
+
+#progress{
+	color: rgb(192, 192, 192);
 }
 
 .info{

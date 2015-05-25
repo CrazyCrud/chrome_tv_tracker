@@ -3134,13 +3134,20 @@ module.exports = {
 			}
 		};
 
-		MainView.prototype.activateOverlay = function(){
+		MainView.prototype.activateOverlay = function(progress){
 		    var modalEl = document.createElement('div');
-		    modalEl.style.width = '43px';
-		    modalEl.style.height = '11px';
+		    modalEl.style.width = '120px';
+		    modalEl.style.height = '60px';
 		    modalEl.style.margin = '100px auto';
+		    modalEl.style.textAlign = 'center';
+		    modalEl.style.color = 'rgb(150, 150, 150)';
 
-		    modalEl.innerHTML = "<img src='assets/loading.gif'/>";
+		    if(_.isNull(progress)){
+		    	modalEl.innerHTML = "<img src='assets/loading.gif'/>";
+		    }else{
+		    	modalEl.innerHTML = "<img src='assets/loading.gif'/><p id='progress' class='mui-text-caption'></p>";
+		    }
+		    
 
 		    mui.overlay('on', {
 		    	'keyboard': false,
@@ -3239,7 +3246,7 @@ module.exports = {
 
 		    var abortButton = $("<button></button>");
 		    abortButton.addClass('mui-btn mui-btn-primary delete-abort');
-		    abortButton.html("Abort");
+		    abortButton.html("Cancel");
 
 		    var content = $("<div></div>");
 		    content.addClass('dialog');
@@ -3490,7 +3497,9 @@ module.exports = {
 				alreadyAdded: "Already added..."
 			};
 			this.ajaxCounter = 0;
-
+			this.addButton = null;
+			this.MAX_REQUESTS = 40;
+			this.DELAY_IN_MS = 250;
 			var that = this;
 			this.element.on('input', function(event) {
 				that.search();
@@ -3502,9 +3511,11 @@ module.exports = {
 			});
 			mainView.getElement().on('click', '.add', function(event) {
 				event.preventDefault();
-				mainView.activateOverlay();
-				$(this).attr('disabled', 'true');
-				$(this).html(that.messages.adddedSeries);
+				mainView.activateOverlay(true);
+
+				//$(this).attr('disabled', 'true');
+				//$(this).html(that.messages.adddedSeries);
+
 				var seriesId = $(this).parents('li').attr('id');
 				var series = _.find(that.model.get("results"), function(element){
 					return element.id == seriesId;
@@ -3524,6 +3535,7 @@ module.exports = {
 					return;
 				}
 
+				that.addButton = $(this);
 				that.fetchShow(series);
 			});
 
@@ -3615,9 +3627,11 @@ module.exports = {
 					});
 					series.seasons.push(season);
 				}
+				var totalEpisodes = 0;
 				for(var j = 1; j <= seasons.length; j++){
 					for(var i = 1; i <= seasons[j - 1].episode_count; i++){
-						that.fetchEpisode(series, j, i);
+						that.fetchEpisode(series, j, i, totalEpisodes);
+						totalEpisodes++;
 					}
 				}
 			}, 'json')
@@ -3629,27 +3643,73 @@ module.exports = {
 			});
 		};
 
-		SearchView.prototype.fetchEpisode = function(series, seasonNumber, episodeNumber){
+		SearchView.prototype.fetchEpisode = function(series, seasonNumber, episodeNumber, totalEpisodes){
 			var that = this;
-			var url = "http://api.themoviedb.org/3/tv/" + series.id + "/season/" + seasonNumber + "/episode/" + episodeNumber + "?api_key=" + _key;
-			$.get(url, function(response){
-				var episode = new EpisodeModel({
-					id: response.id,
-					name: response.name,
-					date: response.air_date,
-					seriesId: series.id,
-					seasonId: series.seasons[seasonNumber - 1].id,
-					number: response.episode_number
-				});
-				series.seasons[seasonNumber - 1].episodes.push(episode);
+			console.log(series.numberOfEpisodes, this.MAX_REQUESTS);
+			if(series.numberOfEpisodes > this.MAX_REQUESTS){
+				setTimeout(function(){
+					var url = "http://api.themoviedb.org/3/tv/" + series.id + "/season/" + seasonNumber + "/episode/" + episodeNumber + "?api_key=" + _key;
+					$("#progress").html("Fetching season " + seasonNumber);
+					$.get(url, function(response){
+						var episode = new EpisodeModel({
+							id: response.id,
+							name: response.name,
+							date: response.air_date,
+							seriesId: series.id,
+							seasonId: series.seasons[seasonNumber - 1].id,
+							number: response.episode_number
+						});
+						series.seasons[seasonNumber - 1].episodes.push(episode);
 
-			}, 'json').
-			done(function(){
-				that.ajaxCounter += 1;
-				if(that.ajaxCounter >= series.numberOfEpisodes){
-					seriesCollection.save(series);
-				}
-			});
+					}, 'json')
+					.fail(function(response){
+						mainView.deactivateOverlay();
+						console.log("Failed to load episode", response);
+					})
+					.done(function(){
+						that.ajaxCounter += 1;
+						if(that.ajaxCounter >= series.numberOfEpisodes){
+							seriesCollection.save(series);
+							if(!_.isNull(that.addButton)){
+								that.addButton.attr('disabled', 'true');
+								that.addButton.html(that.messages.adddedSeries);
+							}
+							
+						}
+					});
+				}, totalEpisodes * this.DELAY_IN_MS);
+			}else{
+				var that = this;
+				var url = "http://api.themoviedb.org/3/tv/" + series.id + "/season/" + seasonNumber + "/episode/" + episodeNumber + "?api_key=" + _key;
+				console.log("Fetch: ", seasonNumber, episodeNumber);
+				$.get(url, function(response){
+					var episode = new EpisodeModel({
+						id: response.id,
+						name: response.name,
+						date: response.air_date,
+						seriesId: series.id,
+						seasonId: series.seasons[seasonNumber - 1].id,
+						number: response.episode_number
+					});
+					series.seasons[seasonNumber - 1].episodes.push(episode);
+
+				}, 'json')
+				.fail(function(response){
+					mainView.deactivateOverlay();
+					console.log("Failed to load episode", response);
+				})
+				.done(function(){
+					that.ajaxCounter += 1;
+					if(that.ajaxCounter >= series.numberOfEpisodes){
+						seriesCollection.save(series);
+						if(!_.isNull(that.addButton)){
+							that.addButton.attr('disabled', 'true');
+							that.addButton.html(that.messages.adddedSeries);
+						}
+						
+					}
+				});
+			}
 		};
 	};
 	return {
