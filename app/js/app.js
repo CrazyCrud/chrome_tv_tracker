@@ -1,5 +1,4 @@
 var Watchnext = (function(){
-	var _key = 'eb2f22e12032ae1141522496ebbcce55',
 	_currentRequest = null,
 	_state = -1,
 	_isSearching = false,
