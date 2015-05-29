@@ -3499,7 +3499,9 @@ module.exports = {
 			this.ajaxCounter = 0;
 			this.addButton = null;
 			this.MAX_REQUESTS = 40;
-			this.DELAY_IN_MS = 250;
+			this.DELAY_IN_MS = 260;
+			this.REQUEST_PAUSE = 10000;
+			this.lastRequest = null;
 			var that = this;
 			this.element.on('input', function(event) {
 				that.search();
@@ -3568,7 +3570,7 @@ module.exports = {
 
 			if(searchItem.length > 0){
 				var that = this;
-				_currentRequest = $.get(query, function(data) {
+				_currentRequest = $.get(query, function(data, textStatus, request) {
 					if(!_.isNull(data) && !_.isEmpty(data)){
 						_.each(data.results, function(element, index, list){
 							that.model.add({
@@ -3606,7 +3608,7 @@ module.exports = {
 
 			var url = "http://api.themoviedb.org/3/tv/" + series.id + "?api_key=" + _key;
 			var that = this;
-			$.get(url, function(response) {
+			$.get(url, function(response, textStatus, request) {
 				series.inProduction = response.in_production;
 				series.numberOfEpisodes = response.number_of_episodes;
 				series.seasons = [];
@@ -3645,8 +3647,15 @@ module.exports = {
 
 		SearchView.prototype.fetchEpisode = function(series, seasonNumber, episodeNumber, totalEpisodes){
 			var that = this;
-			console.log(series.numberOfEpisodes, this.MAX_REQUESTS);
-			if(series.numberOfEpisodes > this.MAX_REQUESTS){
+			var isMaxRequest = true;
+			/*
+			if(!_.isNull(this.lastRequest)){
+				if((Date.now() - this.lastRequest.getTime()) < this.REQUEST_PAUSE){
+					isMaxRequest = true;
+				}
+			}
+			*/
+			if(series.numberOfEpisodes > this.MAX_REQUESTS || isMaxRequest){
 				setTimeout(function(){
 					var url = "http://api.themoviedb.org/3/tv/" + series.id + "/season/" + seasonNumber + "/episode/" + episodeNumber + "?api_key=" + _key;
 					$("#progress").html("Fetching season " + seasonNumber);
@@ -3670,6 +3679,7 @@ module.exports = {
 						that.ajaxCounter += 1;
 						if(that.ajaxCounter >= series.numberOfEpisodes){
 							seriesCollection.save(series);
+							that.lastRequest = new Date();
 							if(!_.isNull(that.addButton)){
 								that.addButton.attr('disabled', 'true');
 								that.addButton.html(that.messages.adddedSeries);
@@ -3681,7 +3691,6 @@ module.exports = {
 			}else{
 				var that = this;
 				var url = "http://api.themoviedb.org/3/tv/" + series.id + "/season/" + seasonNumber + "/episode/" + episodeNumber + "?api_key=" + _key;
-				console.log("Fetch: ", seasonNumber, episodeNumber);
 				$.get(url, function(response){
 					var episode = new EpisodeModel({
 						id: response.id,
@@ -3702,6 +3711,7 @@ module.exports = {
 					that.ajaxCounter += 1;
 					if(that.ajaxCounter >= series.numberOfEpisodes){
 						seriesCollection.save(series);
+						that.lastRequest = new Date();
 						if(!_.isNull(that.addButton)){
 							that.addButton.attr('disabled', 'true');
 							that.addButton.html(that.messages.adddedSeries);

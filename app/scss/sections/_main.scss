@@ -45,7 +45,21 @@
 }
 
 #mui-overlay{
-	background-color: rgba(0, 0, 0, 0.62);
+	//background-color: rgba(0, 0, 0, 0.62);
+}
+
+#mui-overlay::before{
+	content: '';
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 1);
+	-webkit-filter: blur(90px);
+    filter: blur(90px);
+    opacity: 0.65;
+    z-index: -1;
 }
 
 .series-image, .series-name{
