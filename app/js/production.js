@@ -2716,7 +2716,7 @@ module.exports = {
 
 },{"./lib/jqLite.js":5,"./lib/util.js":6}]},{},[1]);
 ;var Watchnext = (function(){
-	var _key = 'eb2f22e12032ae1141522496ebbcce55',
+	var 
 	_currentRequest = null,
 	_state = -1,
 	_isSearching = false,
@@ -3143,9 +3143,9 @@ module.exports = {
 		    modalEl.style.color = 'rgb(150, 150, 150)';
 
 		    if(_.isNull(progress)){
-		    	modalEl.innerHTML = "<img src='assets/loading.gif'/>";
+		    	modalEl.innerHTML = "<img src='assets/loading_dots.svg' id='loading-animation'/>";
 		    }else{
-		    	modalEl.innerHTML = "<img src='assets/loading.gif'/><p id='progress' class='mui-text-caption'></p>";
+		    	modalEl.innerHTML = "<img src='assets/loading_dots.svg' id='loading-animation'/><p id='progress' class='mui-text-caption'></p>";
 		    }
 		    
 

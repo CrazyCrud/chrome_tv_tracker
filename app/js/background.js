@@ -36,8 +36,9 @@ var Background = (function(){
 				}
 			});
 
-			var showsThisWeek = {},
-				numOfShowsThisWeek = 0,
+			var datesThisWeek = {},
+				showsThisDay = {},
+				numOfdatesThisWeek = 0,
 				now = Date.now();
 
 			if(this.shows.length > 0){
@@ -53,25 +54,60 @@ var Background = (function(){
 								soonest = episodeDate.getTime() - now;
 								nextEpisode = episode;
 								var key = show.id;
-								showsThisWeek[show.id] = new Date(nextEpisode.date);
+								datesThisWeek[show.id] = {
+									nextDate: new Date(nextEpisode.date),
+									episode: episode,
+									show: show
+								};
 							}
 						});
 					});
 				});
 
-				_.each(showsThisWeek, function(value, key, list){
-					if((!_.isNull(value)) && (value.getTime() < (now + 518400000))){
-						numOfShowsThisWeek++;
+				_.each(datesThisWeek, function(value, key, list){
+					if((!_.isNull(value)) && (value.nextDate.getTime() < (now + 518400000))){
+						numOfdatesThisWeek++;
+
+						if((value.nextDate.getTime() < (now + 86400000))){
+							showsThisDay[value.show.id] = value.show;
+						}
 					}
 				});
 
 				var badges = "";
-				if(numOfShowsThisWeek > 0){
-					badges += numOfShowsThisWeek;
+				if(numOfdatesThisWeek > 0){
+					badges += numOfdatesThisWeek;
 				}
 				chrome.browserAction.setBadgeText({
 					text: badges
 				});
+
+				var notification = "";
+				if(!_.isEmpty(showsThisDay)){
+					var singular = true;
+					var i = 0;
+					_.each(showsThisDay, function(value, key, index){
+						if(i > 0){
+							singular = false;
+							notification += "and " + value.name + " ";
+						}else{
+							notification += value.name + " ";
+						}
+						i++;
+					});
+
+					if(!singular){
+						notification += "are continuing in less than 24 hours";
+					}else{
+						notification += "is continuing in less than 24 hours";
+					}
+					chrome.notifications.create({
+						type: "basic",
+						iconUrl: "assets/favicon-128.png",
+						title: "Brace Yourself",
+						message: notification
+					});
+				}
 			}
 		};
 	};
